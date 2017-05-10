@@ -27,3 +27,6 @@
 *.exe
 *.out
 *.app
+
+#Simulators pulled for benchmarking
+simulators
