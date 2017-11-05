@@ -30,3 +30,18 @@
 
 #Simulators pulled for benchmarking
 simulators
+
+#project files
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+CTestTestfile.cmake
+Debug
+Devstone.build
+Devstone.xcodeproj
+cmake_install.cmake
+devstone.config
+devstone.creator
+devstone.creator.user
+devstone.files
+devstone.includes
