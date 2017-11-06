@@ -63,16 +63,16 @@ public:
     std::ifstream is; //the stream
     TIME last;
     TIME next;
-    TIME prefetched_time;
     int prefetched_message;
     
     // default constructor opens the stream and sets initial time
     constexpr devstone_event_reader() noexcept {
+        last = 0;
         is.open("events.txt");
         if (!is.good()) throw std::runtime_error("failed to open events file: events.txt");
-        is >> prefetched_time;
+        is >> next;
         if (is.eof()){
-             prefetched_time = std::numeric_limits<float>::infinity();
+             next = std::numeric_limits<float>::infinity();
         } else {
             is >> prefetched_message;
         }
@@ -104,37 +104,31 @@ private:
     //helper function
     void fetchUntilTimeAdvances() {
         //making use of the prefetched values
-        next = prefetched_time;
         cadmium::get_messages<typename defs::out>(outbag) = {prefetched_message};
         TIME t;
         int m;
         //fetching next messages
         is >> t;
         if (is.eof()){
-            //if there is no more messages, set infinity as next event time
-            prefetched_time = std::numeric_limits<float>::infinity();
-        } else { //else cache the las message fetched
+            next = std::numeric_limits<float>::infinity();
+            return;
+        }
+        while (!is.eof() && t == next){
             is >> m;
             cadmium::get_messages<typename defs::out>(outbag).push_back(m);
-            //intermediary vars for casting
-            TIME t_next;
-            int m_next;
-            is >> t_next;
-            //advance until different time is fetched
-            while( t == next){
-                if (is.eof()){
-                    prefetched_time = std::numeric_limits<float>::infinity();
-                    return;
-                } else {
-                    is >> m_next;
-                    cadmium::get_messages<typename defs::out>(outbag).push_back(m_next);
-                }
-                is >> t_next;
+            is >> t;
+        }
+        if (is.eof()){
+            next = std::numeric_limits<float>::infinity();
+            return;
+        } else {
+            if (next < t) {
+                next = t;
+                //cache the last message fetched
+                is >> prefetched_message;
+            } else {
+                throw std::runtime_error("next is before than now");
             }
-            //cache the last message fetched
-            if (t_next < next) throw std::exception();
-            prefetched_time = t_next;
-            prefetched_message = m_next;
         }
     }
 
