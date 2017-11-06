@@ -171,15 +171,36 @@ using TOP_coupled=cadmium::modeling::coupled_model<TIME, TOP_coupled_in_ports, T
     return os;
 }
 
-ostream& generate_main(ostream& os){
+ostream& generate_main(bool log_all, ostream& os){
+    if (log_all){
+        os << R"/("
+        //LOG state changes TO COUT
+        using namespace cadmium::logger;
+        using info=logger<logger_info, verbatim_formatter, cout_sink_provider>;
+        using debug=logger<logger_debug, verbatim_formatter, cout_sink_provider>;
+        using state=logger<logger_state, verbatim_formatter, cout_sink_provider>;
+        using log_messages=logger<logger_messages, verbatim_formatter, cout_sink_provider>;
+        using routing=logger<logger_message_routing, verbatim_formatter, cout_sink_provider>;
+        using global_time=logger<logger_global_time, verbatim_formatter, cout_sink_provider>;
+        using local_time=logger<logger_local_time, verbatim_formatter, cout_sink_provider>;
+        using log_all=multilogger<info, debug, state, log_messages, routing, global_time, local_time>;
+)/";
+    }
     os << R"/(
-
 using hclock=std::chrono::high_resolution_clock; //for measuring execution time
 
 int main(){
     auto start = hclock::now(); //to measure simulation execution time
     
-    cadmium::engine::runner<float, TOP_coupled> r{0.0};
+)/";
+    if ( log_all ) {
+        os << R"/(cadmium::engine::runner<float, TOP_coupled, log_all> r{0.0};
+)/";
+    } else { //default logger
+        os << R"/(cadmium::engine::runner<float, TOP_coupled> r{0.0};
+        )/";
+    }
+    os << R"/(
     r.runUntil(std::numeric_limits<float>::infinity());
     
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>
@@ -206,6 +227,7 @@ int main(int argc, char* argv[]){
     ("event-list", po::value<string>()->required(), "set the file to read the events. The format is 2 ints per line meaning time->msg")
     ("time-advance", po::value<int>()->default_value(1), "set the time expend in external transtions by the Dhrystone in miliseconds: integer value")
     ("output", po::value<string>()->required(), "set the name of the file to save the generated model")
+    ("logger", po::value<string>()->default_value("default"), "set the logger to use. Options: all, default")
     ;
     
     po::variables_map vm;
@@ -256,6 +278,7 @@ int main(int argc, char* argv[]){
     int time_advance = vm["time-advance"].as<int>();
     string event_list = vm["event-list"].as<string>();
     string output = vm["output"].as<string>();
+    bool log_all = (vm["logger"].as<string>() == "default"?false:true);
     //finished processing input
     
     auto processed_parameters = hclock::now();
@@ -276,7 +299,7 @@ int main(int argc, char* argv[]){
             generate_level(l, width, ofs);
         }
         generate_top_models(depth, width, ofs);
-        generate_main(ofs);
+        generate_main(log_all, ofs);
     }
     
     auto model_generated = hclock::now();
@@ -286,6 +309,9 @@ int main(int argc, char* argv[]){
     cout << "kind: LI ";
     cout << "width: " << width << " ";
     cout << "depth: " << depth << " ";
+    cout << "external: " << ext_cycles << " ";
+    cout << "internal: " << int_cycles << " ";
+    cout << "logger: " << (log_all?"ALL":"default");
     cout << endl;
 
     cout << "theory atomic models created: " << models_quantity << std::endl;
