@@ -197,7 +197,7 @@ int main(){
         os << R"/(cadmium::engine::runner<float, TOP_coupled, log_all> r{0.0};
 )/";
     } else { //default logger
-        os << R"/(cadmium::engine::runner<float, TOP_coupled> r{0.0};
+        os << R"/(cadmium::engine::runner<float, TOP_coupled, cadmium::logger::not_logger> r{0.0};
         )/";
     }
     os << R"/(

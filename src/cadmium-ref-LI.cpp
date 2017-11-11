@@ -29,6 +29,7 @@
 #include <cadmium/engine/pdevs_runner.hpp>
 #include "cadmium-devstone-atomic.hpp"
 #include "cadmium-event-reader.hpp"
+#include <cadmium/logger/logger.hpp>
 
 // Ports for coupled models, we use the same in every level
 struct coupled_in_port : public cadmium::in_port<int>{};
@@ -125,10 +126,13 @@ using TOP_coupled=cadmium::modeling::coupled_model<TIME, TOP_coupled_in_ports, T
 
 using hclock=std::chrono::high_resolution_clock; //for measuring execution time
 
+
+using global_logger=cadmium::logger::logger<cadmium::logger::logger_global_time, cadmium::logger::verbatim_formatter, cadmium::logger::cout_sink_provider>;
+
 int main(){
     auto start = hclock::now(); //to measure simulation execution time
     
-    cadmium::engine::runner<float, TOP_coupled> r{0.0};
+    cadmium::engine::runner<float, TOP_coupled, global_logger> r{0.0};
     r.runUntil(std::numeric_limits<float>::infinity());
     
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>
