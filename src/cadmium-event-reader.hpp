@@ -31,6 +31,7 @@
 #include<cadmium/modeling/message_bag.hpp>
 #include<limits>
 #include<fstream>
+#include <cassert>
 
 /**
  * Events are read from "events.txt", first column is absolute time the event has to be sent,
@@ -66,7 +67,7 @@ public:
     int prefetched_message;
     
     // default constructor opens the stream and sets initial time
-    constexpr devstone_event_reader() noexcept {
+    constexpr devstone_event_reader() {
         last = 0;
         is.open("events.txt");
         if (!is.good()) throw std::runtime_error("failed to open events file: events.txt");

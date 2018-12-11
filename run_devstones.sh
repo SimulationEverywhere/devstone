@@ -27,7 +27,7 @@ for D in `seq 2 1 10`; do
 	for W in `seq 2 1 10`; do
 		echo "Building model W:${W} D:${D}"
                 /usr/bin/time -l \
-                clang++ --std=c++14 -Isimulators/cadmium/include -Isrc \
+                clang++ --std=c++17 -Isimulators/cadmium/include -Isrc \
                         "${PREFIX}/LI_DEVSTONE_D${D}_W${W}.cpp" dhry/dhry_1.o dhry/dhry_2.o \
                         -o "${PREFIX}/LI_DEVSTONE_D${D}_W${W}"
         done
