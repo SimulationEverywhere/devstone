@@ -21,7 +21,7 @@ if [ -d "$CDBOOST_DIR" ]; then
     git pull
 else
     cd $SIMULATORS_DIR
-    git clone git clone https://scm.gforge.inria.fr/anonscm/git/cdboost/cdboost.git
+    git clone https://scm.gforge.inria.fr/anonscm/git/cdboost/cdboost.git
 fi
 
 #adevs does not have a git repository available
@@ -29,9 +29,9 @@ echo "Fetching adevs"
 ADEVS_DIR="$SIMULATORS_DIR/adevs"
 if [ -d "$ADEVS_DIR" ]; then
     cd "$ADEVS_DIR"
-    git svn fetch
-    git svn rebase
+    svn fetch
+    svn rebase
 else
     cd $SIMULATORS_DIR
-    git svn clone https://svn.code.sf.net/p/adevs/code/trunk adevs
+    svn checkout https://svn.code.sf.net/p/adevs/code/trunk adevs
 fi
