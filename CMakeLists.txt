@@ -17,7 +17,7 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options system thread REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -48,7 +48,21 @@ target_include_directories(cadmium-devstone
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
 )
 target_link_libraries(cadmium-devstone
-                      ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                      ${Boost_LIBRARIES}
+)
+
+## Reference models used for developing and testing the model generators
+add_executable(LI_3_3
+               src/LI_3_3.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               dhry/dhry_1.o dhry/dhry_2.o
+               events.txt
+)
+target_include_directories(LI_3_3
+                           PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+target_link_libraries(LI_3_3
+                      ${Boost_LIBRARIES}
 )
 
 ## Reference models used for developing and testing the model generators
@@ -61,6 +75,9 @@ add_executable(cadmium-ref-LI
 target_include_directories(cadmium-ref-LI
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
 )
+target_link_libraries(cadmium-ref-LI
+                      ${Boost_LIBRARIES}
+)
 
 add_executable(cadmium-ref-HI
                src/cadmium-ref-HI.cpp
@@ -70,6 +87,9 @@ add_executable(cadmium-ref-HI
 )
 target_include_directories(cadmium-ref-HI
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+target_link_libraries(cadmium-ref-HI
+                      ${Boost_LIBRARIES}
 )
 
 ## Test that generated matches ref
