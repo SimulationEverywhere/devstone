@@ -29,9 +29,9 @@ echo "Fetching adevs"
 ADEVS_DIR="$SIMULATORS_DIR/adevs"
 if [ -d "$ADEVS_DIR" ]; then
     cd "$ADEVS_DIR"
-    svn fetch
-    svn rebase
+    git svn fetch
+    git svn rebase
 else
     cd $SIMULATORS_DIR
-    svn checkout https://svn.code.sf.net/p/adevs/code/trunk adevs
+    git svn clone https://svn.code.sf.net/p/adevs/code/trunk adevs
 fi
