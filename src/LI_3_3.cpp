@@ -39,6 +39,8 @@
 #include <cadmium/engine/pdevs_dynamic_runner.hpp>
 #include <cadmium/logger/tuple_to_ostream.hpp>
 #include <cadmium/logger/common_loggers.hpp>
+#include "../../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
+
 
 //using TIME = float;
 
@@ -159,14 +161,33 @@
 //  TOP_eocs,
 //  TOP_ics
 // );
+/*************** Loggers *******************/
+  static std::ofstream out_data("abp_output.txt");
+    struct oss_sink_provider{
+        static std::ostream& sink(){
+            return out_data;
+        }
+    };
+
+
+using info=cadmium::logger::logger<cadmium::logger::logger_info, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using debug=cadmium::logger::logger<cadmium::logger::logger_debug, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using state=cadmium::logger::logger<cadmium::logger::logger_state, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using log_messages=cadmium::logger::logger<cadmium::logger::logger_messages, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using routing=cadmium::logger::logger<cadmium::logger::logger_message_routing, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using global_time=cadmium::logger::logger<cadmium::logger::logger_global_time, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using local_time=cadmium::logger::logger<cadmium::logger::logger_local_time, cadmium::dynamic::logger::formatter<TIME>, oss_sink_provider>;
+using log_all=cadmium::logger::multilogger<info, debug, state, log_messages, routing, global_time, local_time>;
+
+using logger_top=cadmium::logger::multilogger<log_messages, global_time>;
 
 using hclock=std::chrono::high_resolution_clock; //for measuring execution time
 
 int main(){
     auto start = hclock::now(); //to measure simulation execution time
-
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(3,3);
-    cadmium::dynamic::engine::runner<TIME, cadmium::logger::not_logger> r(TOP_coupled, 0.0);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(10,10);
+    dynamic_export_model_to_json(std::cout, TOP_coupled);
+    cadmium::dynamic::engine::runner<TIME, log_all/*cadmium::logger::not_logger*/> r(TOP_coupled, 0.0);
     r.run_until_passivate();
 
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>
