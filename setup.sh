@@ -21,7 +21,7 @@ if [ -d "$CDBOOST_DIR" ]; then
     git pull
 else
     cd $SIMULATORS_DIR
-    git clone git clone https://scm.gforge.inria.fr/anonscm/git/cdboost/cdboost.git
+    git clone https://scm.gforge.inria.fr/anonscm/git/cdboost/cdboost.git
 fi
 
 #adevs does not have a git repository available

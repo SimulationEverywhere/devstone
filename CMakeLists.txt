@@ -12,7 +12,7 @@ include(CheckCXXCompilerFlag)
 # Check for standard to use
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if(HAVE_FLAG_STD_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
@@ -21,22 +21,22 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-## Dhrystone 
+## Dhrystone
 add_custom_command(OUTPUT dhry/dhry_1.o dhry/dhry_2.o
                    COMMAND make
                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/dhry
 )
 
 ## CDBoost
-add_executable(cdboost-devstone 
+add_executable(cdboost-devstone
                src/cdboost-devstone.cpp
                src/cdboost-devstone-atomic.hpp
                dhry/dhry_1.o dhry/dhry_2.o
 )
-target_include_directories(cdboost-devstone 
+target_include_directories(cdboost-devstone
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cdboost/include
 )
-target_link_libraries(cdboost-devstone 
+target_link_libraries(cdboost-devstone
                       ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
@@ -79,4 +79,4 @@ enable_testing()
 add_test(NAME Cadmium_generator_LI_3x3
          COMMAND ../test/check_generated_LI_against_ref.sh
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-) 
+)

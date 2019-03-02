@@ -11,7 +11,7 @@ cp events.txt ${PREFIX}/events.txt
 for D in `seq 2 1 10`; do
 	for W in `seq 2 1 10`; do
 		echo "Generating model W:${W} D:${D}"
- 		Debug/cadmium-devstone   \
+ 		./cadmium-devstone   \
                             --kind=LI    \
                             --width=${W} \
                             --depth=${D} \
@@ -26,19 +26,17 @@ done
 for D in `seq 2 1 10`; do
 	for W in `seq 2 1 10`; do
 		echo "Building model W:${W} D:${D}"
-                /usr/bin/time -l \
-                clang++ --std=c++17 -Isimulators/cadmium/include -Isrc \
+                /usr/bin/time -f "%e" \
+                clang++ --std=c++17 -ftemplate-depth=2048 -Isimulators/cadmium/include -Isrc \
                         "${PREFIX}/LI_DEVSTONE_D${D}_W${W}.cpp" dhry/dhry_1.o dhry/dhry_2.o \
                         -o "${PREFIX}/LI_DEVSTONE_D${D}_W${W}"
         done
 done
 # Here we run the generated models and log their executions
-# Here we build the generated models and log their metrics
 for D in `seq 2 1 10`; do
         for W in `seq 2 1 10`; do
                 echo "Running model W:${W} D:${D}"
-                /usr/bin/time -l \
+                /usr/bin/time -f "%e" \
                 "${PREFIX}/LI_DEVSTONE_D${D}_W${W}"
         done
 done
-
