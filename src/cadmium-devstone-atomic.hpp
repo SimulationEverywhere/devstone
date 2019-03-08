@@ -99,7 +99,7 @@ public:
 
     void confluence_transition(TIME e, typename cadmium::make_message_bags<input_ports>::type mbs) {
         internal_transition();
-        external_transition(0.0f, mbs);
+        external_transition(e, mbs);
     }
 
     outbag_t output() const {
