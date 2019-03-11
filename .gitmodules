@@ -1,0 +1,3 @@
+[submodule "DEVSDiagrammer"]
+	path = DEVSDiagrammer
+	url = git@github.com:Laouen/DEVSDiagrammer.git
