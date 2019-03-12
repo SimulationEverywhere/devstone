@@ -89,7 +89,13 @@ enable_testing()
 FILE(GLOB TestSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*_test.cpp)
 foreach(testSrc ${TestSources})
         get_filename_component(testName ${testSrc} NAME_WE)
-        add_executable(${testName} test/main-test.cpp ${testSrc})
+        add_executable(${testName}
+                       test/main-test.cpp
+                       ${testSrc}
+                       dhry/dhry_1.o dhry/dhry_2.o)
+        target_include_directories(${testName}
+                                   PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+        )
         target_link_libraries(${testName} PUBLIC ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 	      add_test(${testName} ${testName})
 endforeach(testSrc)
