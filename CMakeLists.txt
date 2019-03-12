@@ -17,7 +17,7 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -85,9 +85,18 @@ target_include_directories(cadmium-ref-HI
 
 ## Test that generated matches ref
 enable_testing()
+# Unit tests
+FILE(GLOB TestSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*_test.cpp)
+foreach(testSrc ${TestSources})
+        get_filename_component(testName ${testSrc} NAME_WE)
+        add_executable(${testName} test/main-test.cpp ${testSrc})
+        target_link_libraries(${testName} PUBLIC ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+	      add_test(${testName} ${testName})
+endforeach(testSrc)
 
 ##LI is 3x3
+# TODO: This test should be rewritten comparing both models using DEVDiagrammer Json instead of source
 add_test(NAME Cadmium_generator_LI_3x3
-         COMMAND ../test/check_generated_LI_against_ref.sh
+         COMMAND test/check_generated_LI_against_ref.sh
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )

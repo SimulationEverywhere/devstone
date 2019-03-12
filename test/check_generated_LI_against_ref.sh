@@ -19,6 +19,6 @@ echo "Generating model W:${W} D:${D}"
     --event-list=${EVENTS}\
     --output="${PREFIX}/LI_DEVSTONE_D${D}_W${W}.cpp"
 
-diff -b -w -E -B ${THIS_PATH}/../src/cadmium-ref-LI.cpp "${PREFIX}/LI_DEVSTONE_D${D}_W${W}.cpp" > ${PREFIX}/diff-LI
-diff ${THIS_PATH}/../test/expected_LI_3x3_diff ${PREFIX}/diff-LI
+# Diff between the 2 files ignoring spaces, tabs, blank lines and comments
+diff -b -w -E -B -I '//.*' ${THIS_PATH}/../src/cadmium-ref-LI.cpp "${PREFIX}/LI_DEVSTONE_D${D}_W${W}.cpp"
 exit $?
