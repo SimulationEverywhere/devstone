@@ -92,7 +92,7 @@ foreach(testSrc ${TestSources})
         add_executable(${testName}
                        test/main-test.cpp
                        ${testSrc}
-                       dhry/dhry_1.o dhry/dhry_2.o)
+                       dhry/dhry_1.o dhry/dhry_2.o test/test_helpers.cpp)
         target_include_directories(${testName}
                                    PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
         )

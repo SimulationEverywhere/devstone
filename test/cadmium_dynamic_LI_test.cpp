@@ -28,6 +28,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+
+#include "test_helpers.cpp"
 #include "../src/dynamic/LI_generator.cpp"
 #include "../../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
 
@@ -64,19 +66,70 @@ BOOST_AUTO_TEST_CASE ( top_level_has_an_IC_test ){
 }
 
 BOOST_AUTO_TEST_CASE ( coupled_models_have_W_submodels ) {
-    auto iscoupled = [](auto par) { return par.second.get_child("type").data() == "coupled"; };
-
     auto TOP_submodels = tree.get_child("models");
     auto it_coupled = std::find_if(TOP_submodels.begin(), TOP_submodels.end(), iscoupled);
-     BOOST_REQUIRE(it_coupled != TOP_submodels.end()); //a coupled model was found
-     BOOST_CHECK_EQUAL(it_coupled->second.get_child("models").size(), 3);
+    BOOST_REQUIRE(it_coupled != TOP_submodels.end()); //a coupled model was found
+    BOOST_CHECK_EQUAL(it_coupled->second.get_child("models").size(), 3);
+}
+
+BOOST_AUTO_TEST_CASE ( coupled_models_have_one_input_and_one_output ) {
+    auto TOP_submodels = tree.get_child("models");
+    auto it_coupled = std::find_if(TOP_submodels.begin(), TOP_submodels.end(), iscoupled);
+    BOOST_REQUIRE(it_coupled != TOP_submodels.end()); //a coupled model was found
+
+    BOOST_CHECK_EQUAL(it_coupled->second.get_child("ports.out.").size(), 1);
+    BOOST_CHECK_EQUAL(it_coupled->second.get_child("ports.out..port_kind").data(), "out");
+    BOOST_CHECK_EQUAL(it_coupled->second.get_child("ports.in.").size(), 1);
+    BOOST_CHECK_EQUAL(it_coupled->second.get_child("ports.in..port_kind").data(), "in");
 }
 
 
+BOOST_AUTO_TEST_CASE ( coupled_models_have_input_connected_to_all_submodels ) {
+    auto TOP_submodels = tree.get_child("models");
+    auto it_coupled = std::find_if(TOP_submodels.begin(), TOP_submodels.end(), iscoupled);
+    BOOST_REQUIRE(it_coupled != TOP_submodels.end()); //a coupled model was found
 
+    auto submodels = it_coupled->second.get_child("models");
+    auto eics = it_coupled->second.get_child("eic");
 
+    std::vector<std::string> submodel_names;
+    for (auto submodel : submodels) {
+        submodel_names.push_back(submodel.second.get<std::string>("id"));
+    }
 
+    std::string coupled_inport_name = it_coupled->second.get_child("ports.in..name").data();
 
+    BOOST_CHECK_EQUAL(submodels.size(), eics.size());
+
+    for (auto eic : eics) {
+        BOOST_CHECK_EQUAL(eic.second.get<std::string>("from_port"), coupled_inport_name);
+
+        std::string to_model_name = eic.second.get<std::string>("to_model");
+
+        auto it = std::find(submodel_names.begin(), submodel_names.end(), to_model_name);
+        BOOST_CHECK(it != submodel_names.end());
+        submodel_names.erase(it);
+    }
+}
+
+BOOST_AUTO_TEST_CASE( coupled_models_have_coupled_only_coupled_child_connected_to_output) {
+    auto TOP_submodels = tree.get_child("models");
+    auto it_coupled = std::find_if(TOP_submodels.begin(), TOP_submodels.end(), iscoupled);
+    BOOST_REQUIRE(it_coupled != TOP_submodels.end()); //a coupled model was found
+
+    auto submodels = it_coupled->second.get_child("models");
+    auto eocs = it_coupled->second.get_child("eoc");
+
+    BOOST_CHECK_EQUAL(eocs.size(), 1);
+
+    auto coupled_child = std::find_if(submodels.begin(), submodels.end(), iscoupled);
+    std::string coupled_child_name = coupled_child->second.get<std::string>("id");
+
+    std::string coupled_outport_name = it_coupled->second.get_child("ports.out..name").data();
+
+    BOOST_CHECK_EQUAL(eocs.get<std::string>(".to_port"), coupled_outport_name);
+    BOOST_CHECK_EQUAL(eocs.get<std::string>(".from_model"), coupled_child_name);
+}
 
 
 
