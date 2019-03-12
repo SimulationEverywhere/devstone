@@ -79,7 +79,7 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint 
         std::vector<std::shared_ptr<cadmium::dynamic::modeling::model>> atomics_current_level;
         if (level < depth) {
             //Last level does not have atomics
-            for(int idx_atomic=0; idx_atomic < width; idx_atomic++) {
+            for(int idx_atomic=0; idx_atomic < width-1; idx_atomic++) {
                 std::string atomic_name = "devstone_atomic_L" + std::to_string(level) + "_" + std::to_string(idx_atomic);
                 atomics_current_level.push_back(cadmium::dynamic::translate::make_dynamic_atomic_model<configured_atomic_devstone, TIME>(atomic_name));
             }
