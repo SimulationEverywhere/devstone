@@ -12,7 +12,7 @@ include(CheckCXXCompilerFlag)
 # Check for standard to use
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if(HAVE_FLAG_STD_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC -g")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
@@ -92,7 +92,7 @@ foreach(testSrc ${TestSources})
         add_executable(${testName}
                        test/main-test.cpp
                        ${testSrc}
-                       dhry/dhry_1.o dhry/dhry_2.o test/test_helpers.cpp)
+                       dhry/dhry_1.o dhry/dhry_2.o test/test_helpers.hpp)
         target_include_directories(${testName}
                                    PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
         )
