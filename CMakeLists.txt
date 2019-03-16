@@ -52,6 +52,17 @@ target_link_libraries(cadmium-devstone
 )
 
 ## Reference models used for developing and testing the model generators
+add_executable(cadmium-dynamic-LI33
+               examples/cadmium-dynamic-LI33.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               dhry/dhry_1.o dhry/dhry_2.o
+               events.txt
+)
+target_include_directories(cadmium-dynamic-LI33
+                           PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+
+## Reference models used for developing and testing the model generators
 add_executable(cadmium-ref-LI
                src/cadmium-ref-LI.cpp
                src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
