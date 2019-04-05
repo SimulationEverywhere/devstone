@@ -30,9 +30,7 @@
 #include<cadmium/modeling/message_bag.hpp>
 #include<limits>
 
-extern "C" {
-int dhrystoneRun (int Number_Of_Runs);
-}
+#include "../dhry/dhry_1.c"
 
 
 /**
@@ -94,12 +92,12 @@ protected:
 
 public:
     void internal_transition() {
-        dhrystoneRun (internal_cycles);
+        DhryStone().dhrystoneRun(internal_cycles);
         state--;
     }
 
     void external_transition(TIME e, typename cadmium::make_message_bags<input_ports>::type mbs) {
-        dhrystoneRun (external_cycles);
+        DhryStone().dhrystoneRun(external_cycles);
         state+= cadmium::get_messages<typename defs::in>(mbs).size();
     }
 

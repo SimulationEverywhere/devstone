@@ -12,12 +12,12 @@ include(CheckCXXCompilerFlag)
 # Check for standard to use
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if(HAVE_FLAG_STD_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -g")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
 
-find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS program_options thread unit_test_framework REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -58,11 +58,13 @@ add_executable(cadmium-dynamic-devstone
                dhry/dhry_1.o dhry/dhry_2.o
                events.txt
 )
+#target_compile_definitions(cadmium-dynamic-devstone
+#                           PUBLIC CADMIUM_EXECUTE_CONCURRENT)
 target_include_directories(cadmium-dynamic-devstone
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
 )
 target_link_libraries(cadmium-dynamic-devstone
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${Boost_LIBRARIES}
 )
 
 ## Reference models used for developing and testing the model generators
