@@ -1,3 +1,5 @@
+#ifndef DHRY_H
+#define DHRY_H
 /*
  ****************************************************************************
  *
@@ -448,3 +450,4 @@ extern Boolean Func_3 (Enumeration Enum_Par_Val);
 
 int dhrystoneRun (int Number_Of_Runs);
 
+#endif // DHRY_H
