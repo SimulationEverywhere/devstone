@@ -12,26 +12,25 @@ include(CheckCXXCompilerFlag)
 # Check for standard to use
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if(HAVE_FLAG_STD_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC -g")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
 endif()
 
-find_package(Boost COMPONENTS program_options thread unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
 ## Dhrystone
-add_custom_command(OUTPUT dhry/dhry_1.o dhry/dhry_2.o
-                   COMMAND make
-                   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/dhry
-)
+# add_custom_command(OUTPUT dhry/dhry_1.o dhry/dhry_2.o
+#                    COMMAND make
+#                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/dhry
+# )
 
 ## CDBoost
 add_executable(cdboost-devstone
                src/cdboost-devstone.cpp
                src/cdboost-devstone-atomic.hpp
-               dhry/dhry_1.o dhry/dhry_2.o
 )
 target_include_directories(cdboost-devstone
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cdboost/include
@@ -55,23 +54,19 @@ target_link_libraries(cadmium-devstone
 add_executable(cadmium-dynamic-devstone
                src/cadmium-dynamic-devstone.cpp
                src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
-               dhry/dhry_1.o dhry/dhry_2.o
                events.txt
 )
-#target_compile_definitions(cadmium-dynamic-devstone
-#                           PUBLIC CADMIUM_EXECUTE_CONCURRENT)
 target_include_directories(cadmium-dynamic-devstone
                            PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
 )
 target_link_libraries(cadmium-dynamic-devstone
-        ${Boost_LIBRARIES}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
 ## Reference models used for developing and testing the model generators
 add_executable(cadmium-ref-LI
                src/cadmium-ref-LI.cpp
                src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
-               dhry/dhry_1.o dhry/dhry_2.o
                events.txt
 )
 target_include_directories(cadmium-ref-LI
@@ -81,7 +76,6 @@ target_include_directories(cadmium-ref-LI
 add_executable(cadmium-ref-HI
                src/cadmium-ref-HI.cpp
                src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
-               dhry/dhry_1.o dhry/dhry_2.o
                events.txt
 )
 target_include_directories(cadmium-ref-HI
@@ -97,7 +91,7 @@ foreach(testSrc ${TestSources})
         add_executable(${testName}
                        test/main-test.cpp
                        ${testSrc}
-                       dhry/dhry_1.o dhry/dhry_2.o test/test_helpers.hpp)
+                       test/test_helpers.hpp)
         target_include_directories(${testName}
                                    PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
         )

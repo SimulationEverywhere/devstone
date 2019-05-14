@@ -27,9 +27,7 @@
 #define P_DEVSTONE_ATOMIC_H
 
 #include <boost/simulation/pdevs/atomic.hpp>
-extern "C" {
-int dhrystoneRun (int Number_Of_Runs);
-}
+#include "../dhry/dhry_1.c"
 
 namespace cdpp {
 /**
@@ -66,7 +64,7 @@ public:
      * @brief internal function.
      */
     void internal() noexcept {
-        dhrystoneRun (_internal_cycles);
+        DhryStone().dhrystoneRun(_internal_cycles);
         _queued_processes--;
     }
     /**
@@ -89,7 +87,7 @@ public:
      * @param t time the external input is received.
      */
     void external(const std::vector<MSG>& msg, const TIME& t) noexcept {
-        dhrystoneRun (_external_cycles);
+        DhryStone().dhrystoneRun(_external_cycles);
         _queued_processes+=msg.size();
     }
     /**
