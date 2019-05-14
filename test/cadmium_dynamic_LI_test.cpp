@@ -33,7 +33,7 @@
 
 #include "test_helpers.hpp"
 #include "../src/dynamic/LI_generator.cpp"
-#include "../../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
+#include "../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
 
 namespace pt = boost::property_tree;
 namespace bdata = boost::unit_test::data;
