@@ -41,7 +41,7 @@ namespace bdata = boost::unit_test::data;
 BOOST_AUTO_TEST_SUITE( cadmium_dynamic_LI_test_suite)
 
 BOOST_DATA_TEST_CASE( top_level_has_two_models_test, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
 
     auto TOP_submodels = tree.get_child("models");
@@ -54,7 +54,7 @@ BOOST_DATA_TEST_CASE( top_level_has_two_models_test, bdata::xrange(2,12,3) * bda
 }
 
 BOOST_DATA_TEST_CASE( top_level_has_an_IC_test, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     BOOST_CHECK_EQUAL(tree.get_child("ic").size(), 1);
     BOOST_CHECK_EQUAL(tree.get<std::string>("ic..from_model"), "devstone_event_reader1");
@@ -62,7 +62,7 @@ BOOST_DATA_TEST_CASE( top_level_has_an_IC_test, bdata::xrange(2,12,3) * bdata::x
 }
 
 BOOST_DATA_TEST_CASE( coupled_from_L1_has_1_submodel_and_its_atomic, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     auto models = tree.get_child("models");
     pt::ptree::iterator it_coupled;
@@ -78,7 +78,7 @@ BOOST_DATA_TEST_CASE( coupled_from_L1_has_1_submodel_and_its_atomic, bdata::xran
 }
 
 BOOST_DATA_TEST_CASE( coupled_models_from_l2_have_W_submodels, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     auto models = tree.get_child("models");
     for (int level=D; level >= 2; level--) {
@@ -95,7 +95,7 @@ BOOST_DATA_TEST_CASE( coupled_models_from_l2_have_W_submodels, bdata::xrange(2,1
 }
 
 BOOST_DATA_TEST_CASE( coupled_models_have_one_input_and_one_output, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     auto models = tree.get_child("models");
     for (int level=D; level >= 1; level--) {
@@ -114,7 +114,7 @@ BOOST_DATA_TEST_CASE( coupled_models_have_one_input_and_one_output, bdata::xrang
 
 
 BOOST_DATA_TEST_CASE( coupled_models_have_input_connected_to_all_submodels, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     auto models = tree.get_child("models");
     for (int level=D; level >= 1; level--) {
@@ -149,7 +149,7 @@ BOOST_DATA_TEST_CASE( coupled_models_have_input_connected_to_all_submodels, bdat
 }
 
 BOOST_DATA_TEST_CASE( coupled_models_have_coupled_only_coupled_child_connected_to_output, bdata::xrange(2,12,3) * bdata::xrange(2,12,3), W, D ){
-    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D);
+    std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = create_LI_model(W, D, 100, 100, 1);
     pt::ptree tree = to_prop_tree(TOP_coupled);
     auto models = tree.get_child("models");
 

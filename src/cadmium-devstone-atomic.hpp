@@ -63,6 +63,12 @@ public:
         cadmium::get_messages<typename defs::out>(outbag).emplace_back(1);
     }
 
+    constexpr devstone_atomic(int ext_cycles, int int_cycles, TIME time_advance) noexcept
+        : period(time_advance), external_cycles(ext_cycles), internal_cycles(int_cycles){
+        //preparing the output bag, since we return always same message
+        cadmium::get_messages<typename defs::out>(outbag).emplace_back(1);
+    }
+
     // state definition
     using queued_processes=int; //for readability
     using state_type=queued_processes;

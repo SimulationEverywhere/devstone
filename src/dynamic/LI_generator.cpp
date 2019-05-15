@@ -42,34 +42,25 @@
 using TIME = float;
 
 // Ports for coupled models, we use the same in every level
-struct coupled_in_port : public cadmium::in_port<int>{};
-struct coupled_out_port : public cadmium::out_port<int>{};
-cadmium::dynamic::modeling::Ports coupled_in_ports = {typeid(coupled_in_port)};
-cadmium::dynamic::modeling::Ports coupled_out_ports = {typeid(coupled_out_port)};
+struct coupledLI_in_port : public cadmium::in_port<int>{};
+struct coupledLI_out_port : public cadmium::out_port<int>{};
 
-//Devstones have no Internal coupling
-cadmium::dynamic::modeling::ICs ics = {};
-
-//A configured version of the devstone atomic, we use same configuration in every atomic.
-template<typename T>
-struct configured_atomic_devstone : devstone_atomic<T>{
-    configured_atomic_devstone(){
-        devstone_atomic<T>::period = 1;
-        devstone_atomic<T>::external_cycles = 100;
-        devstone_atomic<T>::internal_cycles = 100;
-    }
-};
-
-
-std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint width, uint depth) {
+std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(
+        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the LI model with the passed parameters
     // Returns a shared_ptr to the TOP model
-
+    auto make_atomic_devstone = [&ext_cycles, &int_cycles, &time_advance](std::string model_id) -> std::shared_ptr<cadmium::dynamic::modeling::model> {
+        return cadmium::dynamic::translate::make_dynamic_atomic_model<devstone_atomic, TIME>(model_id, ext_cycles, int_cycles, time_advance);
+    };
     //Level 0 has always a single model
-    std::shared_ptr<cadmium::dynamic::modeling::model> devstone_atomic_L0_0 = cadmium::dynamic::translate::make_dynamic_atomic_model<configured_atomic_devstone, TIME>("devstone_atomic_L0_0");
+    std::shared_ptr<cadmium::dynamic::modeling::model> devstone_atomic_L0_0 = make_atomic_devstone("devstone_atomic_L0_0");
 
     std::unordered_map<int, cadmium::dynamic::modeling::Models> atomics_by_level;
     std::unordered_map<int, std::shared_ptr<cadmium::dynamic::modeling::model>> coupleds_by_level;
+
+    cadmium::dynamic::modeling::Ports coupled_in_ports = {typeid(coupledLI_in_port)};
+    cadmium::dynamic::modeling::Ports coupled_out_ports = {typeid(coupledLI_out_port)};
+    cadmium::dynamic::modeling::ICs ics = {}; //LI models have no Internal coupling
 
     for (int level=1; level <= depth; level++) {
 
@@ -79,7 +70,7 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint 
             //Last level does not have atomics
             for(int idx_atomic=0; idx_atomic < width-1; idx_atomic++) {
                 std::string atomic_name = "devstone_atomic_L" + std::to_string(level) + "_" + std::to_string(idx_atomic);
-                atomics_current_level.push_back(cadmium::dynamic::translate::make_dynamic_atomic_model<configured_atomic_devstone, TIME>(atomic_name));
+                atomics_current_level.push_back(make_atomic_devstone(atomic_name));
             }
         }
         atomics_by_level[level] = atomics_current_level;
@@ -91,10 +82,10 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint 
         if (level == 1) {
             Lcoupled_submodels= {devstone_atomic_L0_0};
             Lcoupled_eics = {
-                cadmium::dynamic::translate::make_EIC<coupled_in_port, devstone_atomic_defs::in>("devstone_atomic_L0_0")
+                cadmium::dynamic::translate::make_EIC<coupledLI_in_port, devstone_atomic_defs::in>("devstone_atomic_L0_0")
             };
             Lcoupled_eocs = {
-              cadmium::dynamic::translate::make_EOC<devstone_atomic_defs::out,coupled_out_port>("devstone_atomic_L0_0")
+              cadmium::dynamic::translate::make_EOC<devstone_atomic_defs::out,coupledLI_out_port>("devstone_atomic_L0_0")
             };
         } else {
             std::shared_ptr<cadmium::dynamic::modeling::model> coupled_prev_level = coupleds_by_level[level - 1];
@@ -102,20 +93,20 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint 
             Lcoupled_submodels = { coupled_prev_level };
 
             Lcoupled_eics = {
-                cadmium::dynamic::translate::make_EIC<coupled_in_port, coupled_in_port>(
+                cadmium::dynamic::translate::make_EIC<coupledLI_in_port, coupledLI_in_port>(
                     coupled_prev_level.get()->get_id()
                 )
             };
 
             Lcoupled_eocs = {
-                cadmium::dynamic::translate::make_EOC<coupled_out_port, coupled_out_port>(
+                cadmium::dynamic::translate::make_EOC<coupledLI_out_port, coupledLI_out_port>(
                     coupled_prev_level.get()->get_id()
                 )
             };
             for (auto atomic : atomics_by_level[level - 1]) {
                 Lcoupled_submodels.push_back(atomic);
                 Lcoupled_eics.push_back(
-                    cadmium::dynamic::translate::make_EIC<coupled_in_port, devstone_atomic_defs::in>(atomic.get()->get_id())
+                    cadmium::dynamic::translate::make_EIC<coupledLI_in_port, devstone_atomic_defs::in>(atomic.get()->get_id())
                 );
             }
         }
@@ -143,7 +134,7 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(uint 
     cadmium::dynamic::modeling::EICs TOP_eics = {};
     cadmium::dynamic::modeling::EOCs TOP_eocs = {};
     cadmium::dynamic::modeling::ICs TOP_ics = {
-        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupled_in_port>("devstone_event_reader1",last_level_coupled.get()->get_id())
+        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupledLI_in_port>("devstone_event_reader1",last_level_coupled.get()->get_id())
     };
     std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = std::make_shared<cadmium::dynamic::modeling::coupled<TIME>>(
      "TOP_coupled",

@@ -42,32 +42,27 @@
 using TIME = float;
 
 // Ports for coupled models, we use the same in every level
-struct coupled_in_port1 : public cadmium::in_port<int>{};
-struct coupled_in_port2 : public cadmium::in_port<int>{};
-struct coupled_out_port : public cadmium::out_port<int>{};
-cadmium::dynamic::modeling::Ports coupled_in_ports = {typeid(coupled_in_port1), typeid(coupled_in_port2)};
-cadmium::dynamic::modeling::Ports coupled_out_ports = {typeid(coupled_out_port)};
-
-//A configured version of the devstone atomic, we use same configuration in every atomic.
-template<typename T>
-struct configured_atomic_devstone : devstone_atomic<T>{
-    configured_atomic_devstone(){
-        devstone_atomic<T>::period = 1;
-        devstone_atomic<T>::external_cycles = 100;
-        devstone_atomic<T>::internal_cycles = 100;
-    }
-};
+struct coupledHOmod_in_port1 : public cadmium::in_port<int>{};
+struct coupledHOmod_in_port2 : public cadmium::in_port<int>{};
+struct coupledHOmod_out_port : public cadmium::out_port<int>{};
 
 using ModelMatrix = std::vector<std::vector<std::shared_ptr<cadmium::dynamic::modeling::model>>>;
 
-std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(uint width, uint depth) {
+std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(
+        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the HOmod model with the passed parameters
     // Returns a shared_ptr to the TOP model
 
+    auto make_atomic_devstone = [&ext_cycles, &int_cycles, &time_advance](std::string model_id) -> std::shared_ptr<cadmium::dynamic::modeling::model> {
+        return cadmium::dynamic::translate::make_dynamic_atomic_model<devstone_atomic, TIME>(model_id, ext_cycles, int_cycles, time_advance);
+    };
     //Level 0 has always a single model
-    std::shared_ptr<cadmium::dynamic::modeling::model> devstone_atomic_L0_0 = cadmium::dynamic::translate::make_dynamic_atomic_model<configured_atomic_devstone, TIME>("devstone_atomic_L0_0");
+    std::shared_ptr<cadmium::dynamic::modeling::model> devstone_atomic_L0_0 = make_atomic_devstone("devstone_atomic_L0_0");
     std::unordered_map<int, ModelMatrix> atomics_by_level;
     std::unordered_map<int, std::shared_ptr<cadmium::dynamic::modeling::model>> coupleds_by_level;
+
+    cadmium::dynamic::modeling::Ports coupled_in_ports = {typeid(coupledHOmod_in_port1), typeid(coupledHOmod_in_port2)};
+    cadmium::dynamic::modeling::Ports coupled_out_ports = {typeid(coupledHOmod_out_port)};
 
     for (int level=1; level <= depth; level++) {
 
@@ -79,7 +74,7 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(ui
                 cadmium::dynamic::modeling::Models models_col;
                 for(int idx_row=0; idx_row < idx_column + 2; idx_row++) {
                     std::string atomic_name = "devstone_atomic_L" + std::to_string(level) + "_" + std::to_string(idx_column) + "," + std::to_string(idx_row);
-                    models_col.push_back(cadmium::dynamic::translate::make_dynamic_atomic_model<configured_atomic_devstone, TIME>(atomic_name));
+                    models_col.push_back(make_atomic_devstone(atomic_name));
                 }
                 atomics_current_level.push_back(models_col);
             }
@@ -95,10 +90,10 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(ui
         if (level == 1) {
             Lcoupled_submodels= {devstone_atomic_L0_0};
             Lcoupled_eics = {
-                cadmium::dynamic::translate::make_EIC<coupled_in_port1, devstone_atomic_defs::in>("devstone_atomic_L0_0")
+                cadmium::dynamic::translate::make_EIC<coupledHOmod_in_port1, devstone_atomic_defs::in>("devstone_atomic_L0_0")
             };
             Lcoupled_eocs = {
-              cadmium::dynamic::translate::make_EOC<devstone_atomic_defs::out,coupled_out_port>("devstone_atomic_L0_0")
+              cadmium::dynamic::translate::make_EOC<devstone_atomic_defs::out,coupledHOmod_out_port>("devstone_atomic_L0_0")
             };
         } else {
             std::shared_ptr<cadmium::dynamic::modeling::model> coupled_prev_level = coupleds_by_level[level - 1];
@@ -106,13 +101,13 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(ui
             Lcoupled_submodels = { coupled_prev_level };
 
             Lcoupled_eics = {
-                cadmium::dynamic::translate::make_EIC<coupled_in_port1, coupled_in_port1>(
+                cadmium::dynamic::translate::make_EIC<coupledHOmod_in_port1, coupledHOmod_in_port1>(
                     coupled_prev_level.get()->get_id()
                 )
             };
 
             Lcoupled_eocs = {
-                cadmium::dynamic::translate::make_EOC<coupled_out_port, coupled_out_port>(
+                cadmium::dynamic::translate::make_EOC<coupledHOmod_out_port, coupledHOmod_out_port>(
                     coupled_prev_level.get()->get_id()
                 )
             };
@@ -126,13 +121,13 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(ui
 
                     if(idx_row == 0 || idx_row == idx_column + 1) { //only first and last row
                         Lcoupled_eics.push_back(
-                                cadmium::dynamic::translate::make_EIC<coupled_in_port2, devstone_atomic_defs::in>(atomic.get()->get_id())
+                                cadmium::dynamic::translate::make_EIC<coupledHOmod_in_port2, devstone_atomic_defs::in>(atomic.get()->get_id())
                         );
                     }
 
                     if(idx_row == 0) {
                         Lcoupled_ics.push_back(
-                                cadmium::dynamic::translate::make_IC<devstone_atomic_defs::out, coupled_in_port2>(atomic.get()->get_id(), coupled_prev_level->get_id())
+                                cadmium::dynamic::translate::make_IC<devstone_atomic_defs::out, coupledHOmod_in_port2>(atomic.get()->get_id(), coupled_prev_level->get_id())
                         );
                     } else {
                         auto prev_atomic = atomics_prev_level[idx_column][idx_row-1];
@@ -167,8 +162,8 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(ui
     cadmium::dynamic::modeling::EICs TOP_eics = {};
     cadmium::dynamic::modeling::EOCs TOP_eocs = {};
     cadmium::dynamic::modeling::ICs TOP_ics = {
-        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupled_in_port1>("devstone_event_reader1",last_level_coupled.get()->get_id()),
-        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupled_in_port2>("devstone_event_reader1",last_level_coupled.get()->get_id())
+        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupledHOmod_in_port1>("devstone_event_reader1",last_level_coupled.get()->get_id()),
+        cadmium::dynamic::translate::make_IC<devstone_event_reader_defs::out,coupledHOmod_in_port2>("devstone_event_reader1",last_level_coupled.get()->get_id())
     };
     std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> TOP_coupled = std::make_shared<cadmium::dynamic::modeling::coupled<TIME>>(
      "TOP_coupled",
