@@ -70,6 +70,7 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HO_model(
         std::vector<std::shared_ptr<cadmium::dynamic::modeling::model>> atomics_current_level;
         if (level < depth) {
             //Last level does not have atomics
+            atomics_current_level.reserve(width-1);
             for(int idx_atomic=0; idx_atomic < width-1; idx_atomic++) {
                 std::string atomic_name = "devstone_atomic_L" + std::to_string(level) + "_" + std::to_string(idx_atomic);
                 atomics_current_level.push_back(make_atomic_devstone(atomic_name));
