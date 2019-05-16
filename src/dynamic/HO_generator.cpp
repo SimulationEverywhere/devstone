@@ -48,7 +48,7 @@ struct coupledHO_out_port1 : public cadmium::out_port<int>{};
 struct coupledHO_out_port2 : public cadmium::out_port<int>{};
 
 std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HO_model(
-        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
+         unsigned int width,  unsigned int depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the HO model with the passed parameters
     // Returns a shared_ptr to the TOP model
 

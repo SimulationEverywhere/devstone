@@ -46,7 +46,7 @@ struct coupledLI_in_port : public cadmium::in_port<int>{};
 struct coupledLI_out_port : public cadmium::out_port<int>{};
 
 std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_LI_model(
-        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
+         unsigned int width,  unsigned int depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the LI model with the passed parameters
     // Returns a shared_ptr to the TOP model
     auto make_atomic_devstone = [&ext_cycles, &int_cycles, &time_advance](std::string model_id) -> std::shared_ptr<cadmium::dynamic::modeling::model> {
