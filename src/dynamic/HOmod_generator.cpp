@@ -49,7 +49,7 @@ struct coupledHOmod_out_port : public cadmium::out_port<int>{};
 using ModelMatrix = std::vector<std::vector<std::shared_ptr<cadmium::dynamic::modeling::model>>>;
 
 std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HOmod_model(
-        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
+         unsigned int width,  unsigned int depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the HOmod model with the passed parameters
     // Returns a shared_ptr to the TOP model
 

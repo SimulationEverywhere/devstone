@@ -46,7 +46,7 @@ struct coupledHI_in_port : public cadmium::in_port<int>{};
 struct coupledHI_out_port : public cadmium::out_port<int>{};
 
 std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HI_model(
-        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
+         unsigned int width,  unsigned int depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the HI model with the passed parameters
     // Returns a shared_ptr to the TOP model
 
