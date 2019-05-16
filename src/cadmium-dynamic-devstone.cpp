@@ -32,6 +32,7 @@
 
 #include <cadmium/engine/pdevs_dynamic_runner.hpp>
 
+#include "helpers.hpp"
 #include "dynamic/LI_generator.cpp"
 #include "dynamic/HI_generator.cpp"
 #include "dynamic/HO_generator.cpp"
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]){
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "produce help message")
-            ("kind", po::value<std::string>()->required(), "set kind of devstone: LI, HI, HO or HOmod")
+            ("kind", po::value<devstone_kind>()->required(), "set kind of devstone: LI, HI, HO or HOmod")
             ("width", po::value<int>()->required(), "set width of the DEVStone: integer value")
             ("depth", po::value<int>()->required(), "set depth of the DEVStone: integer value")
             ("int-cycles", po::value<int>()->required(), "set the Dhrystone cycles to expend in internal transtions: integer value")
@@ -71,40 +72,33 @@ int main(int argc, char* argv[]){
             return 1;
         }
     }
-    std::string kind = vm["kind"].as<std::string>();
-    if (kind.compare("LI") != 0  && kind.compare("HI") != 0 &&
-        kind.compare("HO") != 0 && kind.compare("HOmod") != 0) {
-        std::cout << "The kind needs to be LI, HI, HO or HOmod and received value was: " << kind << std::endl;
-        std::cout << "for mode information run: " << argv[0] << " --help" << std::endl;
-        return 1;
-    }
 
     int width = vm["width"].as<int>();
     int depth = vm["depth"].as<int>();
     int int_cycles = vm["int-cycles"].as<int>();
     int ext_cycles = vm["ext-cycles"].as<int>();
     int time_advance = vm["time-advance"].as<int>();
+    devstone_kind kind = vm["kind"].as<devstone_kind>();
     //finished processing input
 
     auto processed_parameters = hclock::now();
 
-    //create models for LI kind
-    // int models_quantity = (width - 1) * (depth - 1) + 1;
-    // int counted_atomic_models=0;
-    // int counted_coupled_models=0;
-
-
     std::shared_ptr<cadmium::dynamic::modeling::coupled<Time>> TOP_coupled;
-    if (kind.compare("LI") == 0){
-        TOP_coupled = create_LI_model(width,depth, ext_cycles, int_cycles, time_advance);
-    } else if (kind.compare("HI") == 0) {
-        TOP_coupled = create_HI_model(width, depth, ext_cycles, int_cycles, time_advance);
-    } else if (kind.compare("HO") == 0) {
-        TOP_coupled = create_HO_model(width,depth, ext_cycles, int_cycles, time_advance);
-    } else if (kind.compare("HOmod") == 0) {
-        TOP_coupled = create_HOmod_model(width,depth, ext_cycles, int_cycles, time_advance);
-    } else {
-        abort();
+    switch(kind) {
+        case LI:
+            TOP_coupled = create_LI_model(width,depth, ext_cycles, int_cycles, time_advance);
+            break;
+        case HI:
+            TOP_coupled = create_HI_model(width, depth, ext_cycles, int_cycles, time_advance);
+            break;
+        case HO:
+            TOP_coupled = create_HO_model(width,depth, ext_cycles, int_cycles, time_advance);
+            break;
+        case HOmod:
+            TOP_coupled = create_HOmod_model(width,depth, ext_cycles, int_cycles, time_advance);
+            break;
+        default:
+            abort();
     }
 
     auto model_built = hclock::now();
