@@ -4,7 +4,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "../../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
+#include "../DEVSDiagrammer/model_json_exporter/include/dynamic_json_exporter.hpp"
 
 namespace pt = boost::property_tree;
 using TIME = float;
