@@ -4,6 +4,12 @@ BASEDIR_ABS=$(cd "$(dirname "$0")" && pwd)
 SIMULATORS_DIR="$BASEDIR_ABS/simulators"
 echo "Fetching simulators in $SIMULATORS_DIR"
 
+if [ -d "$SIMULATORS_DIR" ]; then
+    echo "Simulators dir was setup in previous run"
+else
+    mkdir -p "$SIMULATORS_DIR"
+fi
+
 echo "Fetching cadmium"
 CADMIUM_DIR="$SIMULATORS_DIR/cadmium"
 if [ -d "$CADMIUM_DIR" ]; then
