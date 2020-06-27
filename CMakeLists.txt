@@ -21,7 +21,7 @@ find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-## Dhrystone
+# Dhrystone
 # add_custom_command(OUTPUT dhry/dhry_1.o dhry/dhry_2.o
 #                    COMMAND make
 #                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/dhry
@@ -102,6 +102,6 @@ endforeach(testSrc)
 ##LI is 3x3
 # TODO: This test should be rewritten comparing both models using DEVDiagrammer Json instead of source
 add_test(NAME Cadmium_generator_LI_3x3
-         COMMAND test/check_generated_LI_against_ref.sh
+         COMMAND test/check_generated_LI_against_ref
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )

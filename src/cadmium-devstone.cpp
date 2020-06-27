@@ -45,7 +45,7 @@ R"/(
  */
 
 #include <chrono>
-#include <cadmium/modeling/coupled_model.hpp>
+#include <cadmium/modeling/coupling.hpp>
 #include <cadmium/modeling/ports.hpp>
 #include <cadmium/engine/pdevs_runner.hpp>
 #include "cadmium-devstone-atomic.hpp"
@@ -101,7 +101,7 @@ using L<<LEVEL>>_eocs=std::tuple<
     cadmium::modeling::EOC<L<<PRELEVEL>>_coupled,coupled_out_port, coupled_out_port>
 >;
 template<typename TIME>
-using L<<LEVEL>>_coupled=cadmium::modeling::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L<<LEVEL>>_submodels, L<<LEVEL>>_eics, L<<LEVEL>>_eocs, ics>;
+using L<<LEVEL>>_coupled=cadmium::modeling::pdevs::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L<<LEVEL>>_submodels, L<<LEVEL>>_eics, L<<LEVEL>>_eocs, ics>;
 )/";
     os << regex_replace(
                         regex_replace( haystack_init, regex(R"/(<<LEVEL>>)/"), to_string(level)),
@@ -142,7 +142,7 @@ using L1_eocs=std::tuple<
     cadmium::modeling::EOC<devstone_atomic_L0_0, devstone_atomic_defs::out, coupled_out_port>
 >;
 template<typename TIME>
-using L1_coupled=cadmium::modeling::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L1_submodels, L1_eics, L1_eocs, ics>;
+using L1_coupled=cadmium::modeling::pdevs::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L1_submodels, L1_eics, L1_eocs, ics>;
 )/";
     } else {
         generate_coupled_model(level, width, os);
@@ -167,7 +167,7 @@ using TOP_ics=std::tuple<
 cadmium::modeling::IC<devstone_event_reader, devstone_event_reader_defs::out, L)/" << depth << R"/(_coupled, coupled_in_port>
 >;
 template<typename TIME>
-using TOP_coupled=cadmium::modeling::coupled_model<TIME, TOP_coupled_in_ports, TOP_coupled_out_ports, TOP_submodels, TOP_eics, TOP_eocs, TOP_ics>;
+using TOP_coupled=cadmium::modeling::pdevs::coupled_model<TIME, TOP_coupled_in_ports, TOP_coupled_out_ports, TOP_submodels, TOP_eics, TOP_eocs, TOP_ics>;
 )/";
     return os;
 }
