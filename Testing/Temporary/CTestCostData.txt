@@ -1,3 +1,0 @@
-cadmium_dynamic_LI_test 11 0.488833
-Cadmium_generator_LI_3x3 1 0.00458117
----
