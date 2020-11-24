@@ -17,7 +17,7 @@ if [ -d "$CADMIUM_DIR" ]; then
     git pull
 else
     cd $SIMULATORS_DIR
-    git clone https://github.com/SimulationEverywhere/cadmium.git
+    git clone https://github.com/SimulationEverywhere/cadmium.git --branch HPC_cadmium
 fi
 
 echo "Fetching cdboost"

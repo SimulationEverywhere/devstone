@@ -63,6 +63,77 @@ target_link_libraries(cadmium-dynamic-devstone
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
+## Cadmium dynamic, concurrent version
+add_executable(cadmium-dynamic-conc-devstone
+               src/cadmium-dynamic-devstone.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               events.txt
+)
+target_compile_definitions(cadmium-dynamic-conc-devstone
+                           PUBLIC CADMIUM_EXECUTE_CONCURRENT
+)
+target_include_directories(cadmium-dynamic-conc-devstone
+        PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+target_link_libraries(cadmium-dynamic-conc-devstone ${Boost_LIBRARIES})
+
+
+
+## Cadmium dynamic, openMP parallel version
+add_executable(cadmium-dynamic-cpu-parallel-devstone
+               src/cadmium-dynamic-devstone.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               events.txt
+)
+target_compile_definitions(cadmium-dynamic-cpu-parallel-devstone
+                           PUBLIC CPU_PARALLEL
+)
+target_include_directories(cadmium-dynamic-cpu-parallel-devstone
+        PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+
+target_link_libraries(cadmium-dynamic-cpu-parallel-devstone
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+
+
+## Cadmium dynamic, openMP only lambda parallel version
+add_executable(cadmium-dynamic-cpu-lambda-parallel-devstone
+               src/cadmium-dynamic-devstone.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               events.txt
+)
+target_compile_definitions(cadmium-dynamic-cpu-lambda-parallel-devstone
+                           PUBLIC CPU_LAMBDA_PARALLEL
+)
+target_include_directories(cadmium-dynamic-cpu-lambda-parallel-devstone
+        PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+
+target_link_libraries(cadmium-dynamic-cpu-lambda-parallel-devstone
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+
+
+## Cadmium dynamic, openMP only delta parallel version
+add_executable(cadmium-dynamic-cpu-delta-parallel-devstone
+               src/cadmium-dynamic-devstone.cpp
+               src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
+               events.txt
+)
+target_compile_definitions(cadmium-dynamic-cpu-delta-parallel-devstone
+                           PUBLIC CPU_PARALLEL
+)
+target_include_directories(cadmium-dynamic-cpu-delta-parallel-devstone
+        PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
+)
+
+target_link_libraries(cadmium-dynamic-cpu-delta-parallel-devstone
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+
+
+
 ## Reference models used for developing and testing the model generators
 add_executable(cadmium-ref-LI
                src/cadmium-ref-LI.cpp
