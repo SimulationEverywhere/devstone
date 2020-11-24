@@ -1,4 +1,4 @@
 [submodule "DEVSDiagrammer"]
 	path = DEVSDiagrammer
 	url = https://github.com/Laouen/DEVSDiagrammer.git
-	branch = HPC_Cadmium
+	branch = HPC_cadmium
