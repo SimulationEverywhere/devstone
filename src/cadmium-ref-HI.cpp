@@ -24,7 +24,7 @@
  */
 
 #include <chrono>
-#include <cadmium/modeling/coupled_model.hpp>
+#include <cadmium/modeling/coupling.hpp>
 #include <cadmium/modeling/ports.hpp>
 #include <cadmium/engine/pdevs_runner.hpp>
 #include "cadmium-devstone-atomic.hpp"
@@ -72,7 +72,7 @@ using L1_eocs=std::tuple<
     cadmium::modeling::EOC<devstone_atomic_L0_0, devstone_atomic_defs::out, coupled_out_port>
 >;
 template<typename TIME>
-using L1_coupled=cadmium::modeling::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L1_submodels, L1_eics, L1_eocs, L1_ics>;
+using L1_coupled=cadmium::modeling::pdevs::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L1_submodels, L1_eics, L1_eocs, L1_ics>;
 
 //Level 2
 //atomics
@@ -101,7 +101,7 @@ using L2_eocs=std::tuple<
     cadmium::modeling::EOC<L1_coupled,coupled_out_port, coupled_out_port>
 >;
 template<typename TIME>
-using L2_coupled=cadmium::modeling::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L2_submodels, L2_eics, L2_eocs, L2_ics>;
+using L2_coupled=cadmium::modeling::pdevs::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L2_submodels, L2_eics, L2_eocs, L2_ics>;
 
 //Level 3 has no atomics because it is the last level
 //coupled
@@ -123,7 +123,7 @@ using L3_eocs=std::tuple<
     cadmium::modeling::EOC<L2_coupled,coupled_out_port, coupled_out_port>
 >;
 template<typename TIME>
-using L3_coupled=cadmium::modeling::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L3_submodels, L3_eics, L3_eocs, L3_ics>;
+using L3_coupled=cadmium::modeling::pdevs::coupled_model<TIME, coupled_in_ports, coupled_out_ports, L3_submodels, L3_eics, L3_eocs, L3_ics>;
 
 //TOP model conecting a generator of events to the input
 using TOP_coupled_in_ports=std::tuple<>;
@@ -135,7 +135,7 @@ using TOP_ics=std::tuple<
 cadmium::modeling::IC<devstone_event_reader, devstone_event_reader_defs::out, L3_coupled, coupled_in_port>
 >;
 template<typename TIME>
-using TOP_coupled=cadmium::modeling::coupled_model<TIME, TOP_coupled_in_ports, TOP_coupled_out_ports, TOP_submodels, TOP_eics, TOP_eocs, TOP_ics>;
+using TOP_coupled=cadmium::modeling::pdevs::coupled_model<TIME, TOP_coupled_in_ports, TOP_coupled_out_ports, TOP_submodels, TOP_eics, TOP_eocs, TOP_ics>;
 
 using hclock=std::chrono::high_resolution_clock; //for measuring execution time
 
