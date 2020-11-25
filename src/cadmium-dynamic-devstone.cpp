@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
             ("int-cycles", po::value<int>()->required(), "set the Dhrystone cycles to expend in internal transtions: integer value")
             ("ext-cycles", po::value<int>()->required(), "set the Dhrystone cycles to expend in external transtions: integer value")
             ("time-advance", po::value<int>()->default_value(0), "set the time expend in external transtions by the Dhrystone in miliseconds: integer value")
-            #ifdef CADMIUM_EXECUTE_CONCURRENT
+            #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
             ("threads", po::value<int>()->required(), "amount of threads to use")
             #endif //CADMIUM_EXECUTE_CONCURRENT
             ;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]){
     int int_cycles = vm["int-cycles"].as<int>();
     int ext_cycles = vm["ext-cycles"].as<int>();
     int time_advance = vm["time-advance"].as<int>();
-    #ifdef CADMIUM_EXECUTE_CONCURRENT
+    #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
     int threads = vm["threads"].as<int>();
     #endif //CADMIUM_EXECUTE_CONCURRENT
     //finished processing input
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "Model creation time: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( model_init - processed_parameters).count() << " seconds" << std::endl;
 
-    #ifdef CADMIUM_EXECUTE_CONCURRENT
+    #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
         cadmium::dynamic::engine::runner<Time, cadmium::logger::not_logger> r(TOP_coupled, 0.0, threads);
     #else
         cadmium::dynamic::engine::runner<TIME, cadmium::logger::not_logger> r(TOP_coupled, 0.0);
