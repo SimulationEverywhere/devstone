@@ -4,22 +4,25 @@ project(Devstone)
 set (Devstone_VERSION_MAJOR 0)
 set (Devstone_VERSION_MINOR 0)
 
-set(Boost_USE_STATIC_LIBS        ON)
-set(Boost_USE_MULTITHREADED      OFF)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
 
 include(CheckCXXCompilerFlag)
 
 # Check for standard to use
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if(HAVE_FLAG_STD_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++17 -fPIC -g -fopenmp")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic --std=c++1z -fopenmp")
 endif()
 
-find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
+#find_package(Boost COMPONENTS program_options unit_test_framework REQUIRED)
+find_package(Boost 1.56.0 COMPONENTS program_options unit_test_framework system thread REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
+
+include_directories(include ${Boost_INCLUDE_DIRS})
 
 # Dhrystone
 # add_custom_command(OUTPUT dhry/dhry_1.o dhry/dhry_2.o
@@ -69,14 +72,25 @@ add_executable(cadmium-dynamic-conc-devstone
                src/cadmium-devstone-atomic.hpp src/cadmium-event-reader.hpp
                events.txt
 )
-target_compile_definitions(cadmium-dynamic-conc-devstone
-                           PUBLIC CADMIUM_EXECUTE_CONCURRENT
-)
+#target_compile_definitions(cadmium-dynamic-conc-devstone
+#                           PUBLIC CADMIUM_EXECUTE_CONCURRENT
+#)
+
+#target_link_libraries(cadmium-dynamic-conc-devstone
+#        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#)
+
+target_compile_definitions(cadmium-dynamic-conc-devstone PUBLIC CADMIUM_EXECUTE_CONCURRENT BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION BOOST_THREAD_PROVIDES_EXECUTORS BOOST_THREAD_USES_MOVE)
+
+
 target_include_directories(cadmium-dynamic-conc-devstone
         PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
 )
-target_link_libraries(cadmium-dynamic-conc-devstone ${Boost_LIBRARIES})
+target_link_libraries(cadmium-dynamic-conc-devstone PUBLIC ${Boost_LIBRARIES})
 
+#target_link_libraries(cadmium-dynamic-conc-devstone
+#        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#)
 
 
 ## Cadmium dynamic, openMP parallel version
@@ -122,7 +136,7 @@ add_executable(cadmium-dynamic-cpu-delta-parallel-devstone
                events.txt
 )
 target_compile_definitions(cadmium-dynamic-cpu-delta-parallel-devstone
-                           PUBLIC CPU_PARALLEL
+                           PUBLIC CPU_DELTA_PARALLEL
 )
 target_include_directories(cadmium-dynamic-cpu-delta-parallel-devstone
         PUBLIC ${PROJECT_SOURCE_DIR}/simulators/cadmium/include
