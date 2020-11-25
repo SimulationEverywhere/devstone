@@ -32,7 +32,6 @@
 
 #include <cadmium/engine/pdevs_dynamic_runner.hpp>
 
-#include "helpers.hpp"
 #include "dynamic/LI_generator.cpp"
 #include "dynamic/HI_generator.cpp"
 #include "dynamic/HO_generator.cpp"
@@ -43,18 +42,20 @@ using hclock=std::chrono::high_resolution_clock;
 using Time=float;
 
 int main(int argc, char* argv[]){
-    auto start = hclock::now();
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "produce help message")
-            ("kind", po::value<devstone_kind>()->required(), "set kind of devstone: LI, HI, HO or HOmod")
+            ("kind", po::value<std::string>()->required(), "set kind of devstone: LI, HI, HO or HOmod")
             ("width", po::value<int>()->required(), "set width of the DEVStone: integer value")
             ("depth", po::value<int>()->required(), "set depth of the DEVStone: integer value")
             ("int-cycles", po::value<int>()->required(), "set the Dhrystone cycles to expend in internal transtions: integer value")
             ("ext-cycles", po::value<int>()->required(), "set the Dhrystone cycles to expend in external transtions: integer value")
             ("time-advance", po::value<int>()->default_value(1), "set the time expend in external transtions by the Dhrystone in miliseconds: integer value")
+            #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
+            ("threads", po::value<int>()->required(), "amount of threads to use")
+            #endif //CADMIUM_EXECUTE_CONCURRENT
             ;
 
     po::variables_map vm;
@@ -72,64 +73,51 @@ int main(int argc, char* argv[]){
             return 1;
         }
     }
+    std::string kind = vm["kind"].as<std::string>();
+    if (kind.compare("LI") != 0  && kind.compare("HI") != 0 &&
+        kind.compare("HO") != 0 && kind.compare("HOmod") != 0) {
+        std::cout << "The kind needs to be LI, HI, HO or HOmod and received value was: " << kind << std::endl;
+        std::cout << "for mode information run: " << argv[0] << " --help" << std::endl;
+        return 1;
+    }
 
     int width = vm["width"].as<int>();
     int depth = vm["depth"].as<int>();
     int int_cycles = vm["int-cycles"].as<int>();
     int ext_cycles = vm["ext-cycles"].as<int>();
     int time_advance = vm["time-advance"].as<int>();
-    devstone_kind kind = vm["kind"].as<devstone_kind>();
+    #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
+    int threads = vm["threads"].as<int>();
+    #endif //CADMIUM_EXECUTE_CONCURRENT
     //finished processing input
 
     auto processed_parameters = hclock::now();
 
     std::shared_ptr<cadmium::dynamic::modeling::coupled<Time>> TOP_coupled;
-    switch(kind) {
-        case LI:
-            TOP_coupled = create_LI_model(width,depth, ext_cycles, int_cycles, time_advance);
-            break;
-        case HI:
-            TOP_coupled = create_HI_model(width, depth, ext_cycles, int_cycles, time_advance);
-            break;
-        case HO:
-            TOP_coupled = create_HO_model(width,depth, ext_cycles, int_cycles, time_advance);
-            break;
-        case HOmod:
-            TOP_coupled = create_HOmod_model(width,depth, ext_cycles, int_cycles, time_advance);
-            break;
-        default:
-            abort();
+    if (kind.compare("LI") == 0){
+        TOP_coupled = create_LI_model(width,depth, ext_cycles, int_cycles, time_advance);
+    } else if (kind.compare("HI") == 0) {
+        TOP_coupled = create_HI_model(width, depth, ext_cycles, int_cycles, time_advance);
+    } else if (kind.compare("HO") == 0) {
+        TOP_coupled = create_HO_model(width,depth, ext_cycles, int_cycles, time_advance);
+    } else if (kind.compare("HOmod") == 0) {
+        TOP_coupled = create_HOmod_model(width,depth, ext_cycles, int_cycles, time_advance);
+    } else {
+        abort();
     }
 
-    auto model_built = hclock::now();
-
-    cadmium::dynamic::engine::runner<TIME, cadmium::logger::not_logger> r(TOP_coupled, 0.0);
+    #if defined CADMIUM_EXECUTE_CONCURRENT || defined CPU_PARALLEL || defined CPU_LAMBDA_PARALLEL || defined CPU_DELTA_PARALLEL
+        cadmium::dynamic::engine::runner<Time, cadmium::logger::not_logger> r(TOP_coupled, 0.0, threads);
+    #else
+        cadmium::dynamic::engine::runner<TIME, cadmium::logger::not_logger> r(TOP_coupled, 0.0);
+    #endif //CADMIUM_EXECUTE_CONCURRENT
 
     auto model_init = hclock::now();
 
-    r.run_until_passivate();
+    r.run_until(1000);
 
     auto finished_simulation = hclock::now();
 
-    std::cout << "Simulation with params: ";
 
-    for (const auto& it : vm) {
-        std::cout << it.first.c_str() << ": ";
-        auto& value = it.second.value();
-        if (auto v = boost::any_cast<int>(&value))
-            std::cout << *v;
-        else if (auto v = boost::any_cast<std::string>(&value))
-            std::cout << *v;
-        else
-            std::cout << "error";
-        std::cout << " ";
-    }
-
-
-    std::cout << std::endl;
-    std::cout << "time processing arguments: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( processed_parameters - start).count() << std::endl;
-    std::cout << "time constructing the models: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( model_built - processed_parameters).count() << std::endl;
-    std::cout << "time initializing the models: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( model_init - model_built).count() << std::endl;
-    std::cout << "time running simulation: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( finished_simulation - model_init).count() << std::endl;
-    std::cout << "total time: " << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( finished_simulation - start).count() << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>( finished_simulation - model_init).count() << std::endl;
 }
