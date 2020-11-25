@@ -29,7 +29,7 @@
 #include "../cadmium-devstone-atomic.hpp"
 #include "../cadmium-event-reader.hpp"
 
-#include <cadmium/modeling/coupling.hpp>
+//#include <cadmium/modeling/coupled_model.hpp>
 #include <cadmium/modeling/ports.hpp>
 #include <cadmium/modeling/dynamic_model_translator.hpp>
 #include <cadmium/concept/coupled_model_assert.hpp>
@@ -48,7 +48,7 @@ struct coupledHO_out_port1 : public cadmium::out_port<int>{};
 struct coupledHO_out_port2 : public cadmium::out_port<int>{};
 
 std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HO_model(
-         unsigned int width,  unsigned int depth, int ext_cycles, int int_cycles, TIME time_advance) {
+        uint width, uint depth, int ext_cycles, int int_cycles, TIME time_advance) {
     // Creates the HO model with the passed parameters
     // Returns a shared_ptr to the TOP model
 
@@ -70,7 +70,6 @@ std::shared_ptr<cadmium::dynamic::modeling::coupled<TIME>> create_HO_model(
         std::vector<std::shared_ptr<cadmium::dynamic::modeling::model>> atomics_current_level;
         if (level < depth) {
             //Last level does not have atomics
-            atomics_current_level.reserve(width-1);
             for(int idx_atomic=0; idx_atomic < width-1; idx_atomic++) {
                 std::string atomic_name = "devstone_atomic_L" + std::to_string(level) + "_" + std::to_string(idx_atomic);
                 atomics_current_level.push_back(make_atomic_devstone(atomic_name));
